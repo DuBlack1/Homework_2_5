@@ -6,13 +6,19 @@ import com.example.homework_2_5.Exception.EmployeeAlreadyAddedException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService{
-    private List<Employee> EmployeeBook = new ArrayList<>();
+    private Map<String, Employee> EmployeeBook;
 
-//    Список сотрудников
+    public EmployeeServiceImpl() {
+        this.EmployeeBook = new HashMap<>();
+    }
+
+    //    Список сотрудников
     @Override
     public String toStringEmployee(){
         return EmployeeBook.toString();
@@ -22,10 +28,8 @@ public class EmployeeServiceImpl implements EmployeeService{
     @Override
     public String findEmployee(String firstName, String lastName){
         Employee forFind = new Employee(firstName, lastName);
-        for (int i = 0; i<EmployeeBook.size(); i++){
-            if (EmployeeBook.get(i).equals(forFind)){
-                return "Сотрудник найден";
-            }
+        if (EmployeeBook.containsKey(forFind.getFullName())){
+            return "Сотрудник найден";
         }
         throw new EmployeeNotFoundException("Сотрудник не найден");
     }
@@ -34,19 +38,18 @@ public class EmployeeServiceImpl implements EmployeeService{
     @Override
     public String addNewEmployee(String firstName, String lastName){
         Employee forAdd = new Employee(firstName, lastName);
-        for (int i = 0; i<EmployeeBook.size(); i++) {
-            if (EmployeeBook.get(i).equals(forAdd)) {
-                throw new EmployeeAlreadyAddedException("Сотрудник уже присутвует в списке");
-            }
+        if (EmployeeBook.containsKey(forAdd.getFullName())) {
+            throw new EmployeeAlreadyAddedException("Сотрудник уже присутвует в списке");
         }
-        EmployeeBook.add(forAdd);
+        EmployeeBook.put(forAdd.getFullName(), forAdd);
         return "Сотрудник добавлен";
     }
 
     //    Удалить сотрудника
     public String deleteEmployee(String firstName, String lastName){
         Employee forRemove = new Employee(firstName, lastName);
-        if (EmployeeBook.remove(forRemove)) {
+        if (EmployeeBook.containsKey(forRemove.getFullName())) {
+            EmployeeBook.remove(forRemove.getFullName());
             return "Сотрудник удален";
         }
         throw new EmployeeNotFoundException("Сотрудник не найден");
